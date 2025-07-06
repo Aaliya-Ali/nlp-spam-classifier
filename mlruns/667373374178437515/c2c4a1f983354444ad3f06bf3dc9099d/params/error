@@ -1,0 +1,1 @@
+pos_label=spam is not a valid label. It should be one of [0, 1]

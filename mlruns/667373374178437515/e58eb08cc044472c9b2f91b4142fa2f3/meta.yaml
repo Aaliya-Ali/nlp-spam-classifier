@@ -1,0 +1,16 @@
+artifact_uri: file:///Users/aaliyaali/development/VNIT/MLOps/nlp-spam-classifier/mlruns/667373374178437515/e58eb08cc044472c9b2f91b4142fa2f3/artifacts
+deleted_time: 1751811655330
+end_time: 1751811224045
+entry_point_name: ''
+experiment_id: '667373374178437515'
+lifecycle_stage: deleted
+run_id: e58eb08cc044472c9b2f91b4142fa2f3
+run_name: nimble-boar-215
+run_uuid: e58eb08cc044472c9b2f91b4142fa2f3
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751811222386
+status: 3
+tags: []
+user_id: aaliyaali

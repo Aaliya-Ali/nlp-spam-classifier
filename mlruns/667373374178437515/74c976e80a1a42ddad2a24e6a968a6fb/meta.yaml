@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/aaliyaali/development/VNIT/MLOps/nlp-spam-classifier/mlruns/667373374178437515/74c976e80a1a42ddad2a24e6a968a6fb/artifacts
+end_time: 1751811533818
+entry_point_name: ''
+experiment_id: '667373374178437515'
+lifecycle_stage: active
+run_id: 74c976e80a1a42ddad2a24e6a968a6fb
+run_name: stately-turtle-437
+run_uuid: 74c976e80a1a42ddad2a24e6a968a6fb
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751811521062
+status: 3
+tags: []
+user_id: aaliyaali

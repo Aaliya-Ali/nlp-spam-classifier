@@ -1,0 +1,16 @@
+artifact_uri: file:///Users/aaliyaali/development/VNIT/MLOps/nlp-spam-classifier/mlruns/667373374178437515/1aea52ab10b54052b5dc0fd048a4244f/artifacts
+deleted_time: 1751811655287
+end_time: 1751811297043
+entry_point_name: ''
+experiment_id: '667373374178437515'
+lifecycle_stage: deleted
+run_id: 1aea52ab10b54052b5dc0fd048a4244f
+run_name: beautiful-pug-468
+run_uuid: 1aea52ab10b54052b5dc0fd048a4244f
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751811295608
+status: 3
+tags: []
+user_id: aaliyaali

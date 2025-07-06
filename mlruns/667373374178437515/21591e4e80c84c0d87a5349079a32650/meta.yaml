@@ -1,0 +1,16 @@
+artifact_uri: file:///Users/aaliyaali/development/VNIT/MLOps/nlp-spam-classifier/mlruns/667373374178437515/21591e4e80c84c0d87a5349079a32650/artifacts
+deleted_time: 1751811655333
+end_time: 1751811157482
+entry_point_name: ''
+experiment_id: '667373374178437515'
+lifecycle_stage: deleted
+run_id: 21591e4e80c84c0d87a5349079a32650
+run_name: mysterious-doe-129
+run_uuid: 21591e4e80c84c0d87a5349079a32650
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751811157437
+status: 3
+tags: []
+user_id: aaliyaali
