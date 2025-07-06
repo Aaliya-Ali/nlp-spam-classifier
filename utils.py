@@ -80,8 +80,14 @@ def save_model_and_vectorizer(classifier, vectorizer):
 
 def train_spam_model(params=None):
     """
-    Trains the spam classification model and saves it.
-    Returns a dictionary with training status, accuracy, and classification report.
+    Trains the spam classification model and saves it, logging to MLflow.
+    Args:
+        params (dict): Dictionary of hyperparameters.
+                       Expected keys: 'max_features', 'alpha', 'test_size', 'random_state'.
+                       Uses defaults if not provided.
+    Returns:
+        A dictionary with training status, accuracy, classification report,
+        MLflow run ID, and the parameters used for training.
     """
     # Define default hyperparameters
     default_params = {
@@ -114,10 +120,10 @@ def train_spam_model(params=None):
 
             # Split data using provided test_size and random_state
             X_train, X_test, y_train, y_test = train_test_split(
-                X, y,
+                X, y,  # Use the directly loaded 0/1 labels here
                 test_size=current_params['test_size'],
                 random_state=current_params['random_state'],
-                stratify=y
+                stratify=y  # Stratify by the 0/1 labels
             )
 
             # Initialize and fit TF-IDF Vectorizer with max_features
@@ -128,27 +134,31 @@ def train_spam_model(params=None):
 
             # Initialize and train the Classifier (Multinomial Naive Bayes) with alpha
             spam_classifier = MultinomialNB(alpha=current_params['alpha'])
-            spam_classifier.fit(X_train_tfidf, y_train)
+            spam_classifier.fit(X_train_tfidf, y_train)  # Fit with 0/1 labels
 
             # Evaluate the model
-            y_pred = spam_classifier.predict(X_test_tfidf)
+            y_pred = spam_classifier.predict(
+                X_test_tfidf)  # Predictions will be 0 or 1
+            # Use 0/1 labels for accuracy
             accuracy = accuracy_score(y_test, y_pred)
 
-            # Calculate and log individual metrics for both classes
-            precision = precision_score(y_test, y_pred, pos_label=0)
-            recall = recall_score(y_test, y_pred, pos_label=0)
-            f1 = f1_score(y_test, y_pred, pos_label=0)
+            precision_spam = precision_score(y_test, y_pred, pos_label=0)
+            recall_spam = recall_score(y_test, y_pred, pos_label=0)
+            f1_spam = f1_score(y_test, y_pred, pos_label=0)
 
             mlflow.log_metric("accuracy", accuracy)
-            mlflow.log_metric("spam_precision", precision)
-            mlflow.log_metric("spam_recall", recall)
-            mlflow.log_metric("spam_f1_score", f1)
+            mlflow.log_metric("spam_precision", precision_spam)
+            mlflow.log_metric("spam_recall", recall_spam)
+            mlflow.log_metric("spam_f1_score", f1_spam)
 
             # Generate and log the full classification report
-            report = classification_report(y_test, y_pred, output_dict=True)
+            # Let's provide target_names for clarity.
+            target_names = ['ham', 'spam']  # Assuming 0=ham, 1=spam
+            report = classification_report(
+                y_test, y_pred, output_dict=True, target_names=target_names)
 
-            # Log metrics for 'ham' class as well
-            if 'ham' in report:
+            # Log metrics for 'ham' class as well if present in report
+            if 'ham' in report:  # This will check if 'ham' key exists in the report generated with target_names
                 mlflow.log_metric("ham_precision", report['ham']['precision'])
                 mlflow.log_metric("ham_recall", report['ham']['recall'])
                 mlflow.log_metric("ham_f1_score", report['ham']['f1_score'])
@@ -164,7 +174,8 @@ def train_spam_model(params=None):
                 "status": "Model trained successfully!",
                 "accuracy": accuracy,
                 "report": report,
-                "mlflow_run_id": mlflow.active_run().info.run_id  # NEW: Return run ID
+                "mlflow_run_id": mlflow.active_run().info.run_id,
+                "used_params": current_params  # Return the parameters used for this run
             }
 
         except FileNotFoundError:
@@ -173,7 +184,8 @@ def train_spam_model(params=None):
                 "status": f"Error: Dataset not found at {DATA_PATH}. Please make sure 'train.csv' is in the 'data' directory.",
                 "accuracy": None,
                 "report": None,
-                "mlflow_run_id": mlflow.active_run().info.run_id
+                "mlflow_run_id": mlflow.active_run().info.run_id,
+                "used_params": current_params
             }
         except Exception as e:
             mlflow.log_param("error", str(e))
@@ -181,5 +193,6 @@ def train_spam_model(params=None):
                 "status": f"An error occurred during training: {e}",
                 "accuracy": None,
                 "report": None,
-                "mlflow_run_id": mlflow.active_run().info.run_id
+                "mlflow_run_id": mlflow.active_run().info.run_id,
+                "used_params": current_params
             }
