@@ -5,14 +5,10 @@ from utils import load_model_and_vectorizer, train_spam_model
 
 app = Flask(__name__)
 
-# Global variables to hold the trained model and vectorizer
-# They will be loaded once the app starts or after training
+# Global variables to hold the trained model, vectorizer, and training info
 spam_classifier = None
 tfidf_vectorizer = None
-
-# --- Routes ---
-
-# The home route will now just return a welcome JSON message
+training_metadata = {}  # Store the training info including best_params
 
 
 @app.route('/')
@@ -20,84 +16,96 @@ def home():
     return jsonify({
         "message": "Welcome to the Email Spam Detector API!",
         "endpoints": {
-            "/predict": "POST request with 'email_content' in form data to classify text.",
-            "/training": "POST request to train or retrain the spam detection model."
+            "/prediction": "POST request with 'email_content' in JSON to classify text.",
+            "/training": "POST request with optional hyperparameters to train/retrain the model.",
+            "/best_model_parameter": "GET request to view best parameters from training"
         }
     })
 
 
 @app.route('/training', methods=['POST'])
 def training_endpoint():
-    global spam_classifier, tfidf_vectorizer  # Declare as global to modify
+    global spam_classifier, tfidf_vectorizer, training_metadata
 
-    # Call the training function from utils.py
-    training_info = train_spam_model()
-
-    # After training, reload the newly trained model into global variables
-    # This ensures the /predict endpoint uses the latest trained model
-    spam_classifier, tfidf_vectorizer = load_model_and_vectorizer()
-
-    # Accept JSON hyperparameters from the request body
-    # silent=True returns None if not valid JSON
+    # Accept hyperparameters from request
     hyperparameters = request.get_json(silent=True)
-
     if hyperparameters is None:
-        hyperparameters = {}  # Use default hyperparameters if no JSON is provided or it's invalid
+        hyperparameters = {}
 
-    # Validate incoming hyperparameters (optional, but good practice)
     allowed_params = ['max_features', 'alpha', 'test_size', 'random_state']
     validated_params = {}
     for k, v in hyperparameters.items():
         if k in allowed_params:
             try:
-                # Type conversion for expected numerical params
                 if k in ['max_features', 'random_state']:
                     validated_params[k] = int(v)
                 elif k in ['alpha', 'test_size']:
                     validated_params[k] = float(v)
-                else:
-                    # Catch-all, though not expected for current params
-                    validated_params[k] = v
             except (ValueError, TypeError):
-                # Log an error or return a bad request, for now, just skip invalid types
-                print(
-                    f"Warning: Invalid type for hyperparameter '{k}': {v}. Using default.")
+                print(f"Warning: Invalid type for '{k}': {v}")
         else:
             print(f"Warning: Unknown hyperparameter '{k}' provided. Ignoring.")
 
-    # Call the training function from utils.py with validated parameters
+    # Train model
     training_info = train_spam_model(params=validated_params)
+    training_metadata = training_info  # Save for future use
 
-    # After training, reload the newly trained model into global variables
-    # This ensures the /predict endpoint uses the latest trained model
     spam_classifier, tfidf_vectorizer = load_model_and_vectorizer()
 
-    # Format the report for JSON output
+    # Format report for JSON
     report_output = {}
     if training_info.get('report'):
         for class_name, metrics in training_info['report'].items():
-            # Convert numpy types to float for JSON serialization if necessary
             if isinstance(metrics, dict):
-                report_output[class_name] = {k: float(v) if isinstance(
-                    v, (float, int)) else v for k, v in metrics.items()}
+                report_output[class_name] = {k: float(v) if isinstance(v, (float, int)) else v for k, v in metrics.items()}
             else:
-                # For 'accuracy', 'macro avg', etc. keys if directly included
                 report_output[class_name] = metrics
 
-    # Construct the JSON response
     response_data = {
         "status": training_info.get('status'),
         "accuracy": f"{training_info['accuracy']:.4f}" if training_info.get('accuracy') else None,
         "classification_report": report_output if report_output else None,
-        # Include the MLflow run ID
-        "mlflow_run_id": training_info.get('mlflow_run_id', 'N/A')
+        "mlflow_run_id": training_info.get('mlflow_run_id', 'N/A'),
+        "best_params": training_info.get('best_params', None)
     }
 
-    # Determine HTTP status code based on training status
     if "Error" in training_info.get('status', ''):
-        return jsonify(response_data), 500  # Internal Server Error
+        return jsonify(response_data), 500
     else:
-        return jsonify(response_data), 200  # OK
+        return jsonify(response_data), 200
+
+
+@app.route('/prediction', methods=['POST'])
+def prediction_endpoint():
+    global spam_classifier, tfidf_vectorizer
+
+    if spam_classifier is None or tfidf_vectorizer is None:
+        return jsonify({"error": "Model not loaded. Train the model first."}), 400
+
+    data = request.get_json()
+    if not data or 'email_content' not in data:
+        return jsonify({"error": "Missing 'email_content' in JSON body."}), 400
+
+    email_text = data['email_content']
+    transformed_text = tfidf_vectorizer.transform([email_text])
+    prediction = spam_classifier.predict(transformed_text)[0]
+
+    return jsonify({
+        "input": email_text,
+        "prediction": "spam" if prediction == 1 else "ham"
+    })
+
+
+@app.route('/best_model_parameter', methods=['GET'])
+def best_model_parameter():
+    global training_metadata
+
+    if not training_metadata or 'best_params' not in training_metadata:
+        return jsonify({"error": "No best_params found. Train the model first."}), 400
+
+    return jsonify({
+        "best_params": training_metadata['best_params']
+    })
 
 
 if __name__ == '__main__':
