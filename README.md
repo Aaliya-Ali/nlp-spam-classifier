@@ -1,5 +1,7 @@
 # NLP based Spam Classifier
 
+# Docker Image: https://hub.docker.com/r/archanaburadkar/spam-detector
+
 An NLP based Spam Classifier built in Python.
 
 ## Steps to run the project locally
