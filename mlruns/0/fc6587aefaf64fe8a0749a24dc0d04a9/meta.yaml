@@ -1,0 +1,14 @@
+artifact_uri: mlflow-artifacts:/0/fc6587aefaf64fe8a0749a24dc0d04a9/artifacts
+end_time: 1751789081543
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: fc6587aefaf64fe8a0749a24dc0d04a9
+run_name: calm-skunk-847
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751789046938
+status: 4
+tags: []
+user_id: SHIKHA

@@ -1,0 +1,14 @@
+artifact_uri: mlflow-artifacts:/0/4fab47e1863e46638f2dd54f71e4eb08/artifacts
+end_time: 1751791111204
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 4fab47e1863e46638f2dd54f71e4eb08
+run_name: polite-dog-142
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751791074763
+status: 3
+tags: []
+user_id: SHIKHA

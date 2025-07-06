@@ -1,0 +1,14 @@
+artifact_uri: mlflow-artifacts:/0/1a7ba04c2ba7473eb77d5dcc4ec6e3a6/artifacts
+end_time: 1751788252575
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 1a7ba04c2ba7473eb77d5dcc4ec6e3a6
+run_name: nosy-perch-775
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751788216259
+status: 4
+tags: []
+user_id: SHIKHA

@@ -1,0 +1,11 @@
+artifact_location: mlflow-artifacts:/0/models/m-f3b30df201914fd2835a2b844b7460b2/artifacts
+creation_timestamp: 1751788185244
+experiment_id: '0'
+last_updated_timestamp: 1751788185244
+lifecycle_stage: active
+model_id: m-f3b30df201914fd2835a2b844b7460b2
+model_type: null
+name: spam_rf_model
+source_run_id: 5be6ba7987ab4a8a8a89d02af23861e1
+status: 1
+status_message: null

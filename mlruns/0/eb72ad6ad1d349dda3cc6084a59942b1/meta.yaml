@@ -1,0 +1,14 @@
+artifact_uri: mlflow-artifacts:/0/eb72ad6ad1d349dda3cc6084a59942b1/artifacts
+end_time: 1751790984060
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: eb72ad6ad1d349dda3cc6084a59942b1
+run_name: righteous-goose-456
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751790946475
+status: 3
+tags: []
+user_id: SHIKHA

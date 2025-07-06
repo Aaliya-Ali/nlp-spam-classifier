@@ -1,0 +1,14 @@
+artifact_uri: mlflow-artifacts:/0/07f83381eccf48f7a067716424ccb5ac/artifacts
+end_time: 1751789864428
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 07f83381eccf48f7a067716424ccb5ac
+run_name: luxuriant-tern-278
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751789825115
+status: 3
+tags: []
+user_id: SHIKHA
