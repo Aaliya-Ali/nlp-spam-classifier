@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/aaliyaali/development/VNIT/MLOps/nlp-spam-classifier/mlruns/667373374178437515/cb86dc6850de42cfa648cecdc8059493/artifacts
+end_time: 1751811546645
+entry_point_name: ''
+experiment_id: '667373374178437515'
+lifecycle_stage: active
+run_id: cb86dc6850de42cfa648cecdc8059493
+run_name: crawling-fish-772
+run_uuid: cb86dc6850de42cfa648cecdc8059493
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751811534296
+status: 3
+tags: []
+user_id: aaliyaali

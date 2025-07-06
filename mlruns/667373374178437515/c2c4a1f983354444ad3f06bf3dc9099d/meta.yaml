@@ -1,0 +1,16 @@
+artifact_uri: file:///Users/aaliyaali/development/VNIT/MLOps/nlp-spam-classifier/mlruns/667373374178437515/c2c4a1f983354444ad3f06bf3dc9099d/artifacts
+deleted_time: 1751811655390
+end_time: 1751811295595
+entry_point_name: ''
+experiment_id: '667373374178437515'
+lifecycle_stage: deleted
+run_id: c2c4a1f983354444ad3f06bf3dc9099d
+run_name: brawny-owl-341
+run_uuid: c2c4a1f983354444ad3f06bf3dc9099d
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751811294243
+status: 3
+tags: []
+user_id: aaliyaali

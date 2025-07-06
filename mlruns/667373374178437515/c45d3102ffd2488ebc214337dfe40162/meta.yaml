@@ -1,0 +1,16 @@
+artifact_uri: file:///Users/aaliyaali/development/VNIT/MLOps/nlp-spam-classifier/mlruns/667373374178437515/c45d3102ffd2488ebc214337dfe40162/artifacts
+deleted_time: 1751811655362
+end_time: 1751811157397
+entry_point_name: ''
+experiment_id: '667373374178437515'
+lifecycle_stage: deleted
+run_id: c45d3102ffd2488ebc214337dfe40162
+run_name: adaptable-colt-451
+run_uuid: c45d3102ffd2488ebc214337dfe40162
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751811157264
+status: 3
+tags: []
+user_id: aaliyaali

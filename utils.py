@@ -12,7 +12,10 @@ from nltk.tokenize import word_tokenize
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score, classification_report, precision_score, recall_score, f1_score
+
+import mlflow
+import mlflow.sklearn
 
 # Define paths for data and models
 DATA_PATH = os.path.join(os.path.dirname(__file__), 'data', 'train.csv')
@@ -75,54 +78,108 @@ def save_model_and_vectorizer(classifier, vectorizer):
         print(f"Error saving model or vectorizer: {e}")
 
 
-def train_spam_model():
+def train_spam_model(params=None):
     """
     Trains the spam classification model and saves it.
     Returns a dictionary with training status, accuracy, and classification report.
     """
-    try:
-        df = pd.read_csv(DATA_PATH, encoding='latin-1')
+    # Define default hyperparameters
+    default_params = {
+        'max_features': 5000,
+        'alpha': 1.0,  # Smoothing parameter for Naive Bayes
+        'test_size': 0.2,
+        'random_state': 42
+    }
+    # Override defaults with provided params
+    current_params = {**default_params, **(params if params else {})}
 
-        df = df.rename(columns={'v1': 'label', 'v2': 'sms'})
-        df = df.drop(columns=['Unnamed: 2', 'Unnamed: 3',
-                     'Unnamed: 4'], errors='ignore')
+    # Set MLflow experiment name
+    mlflow.set_experiment("Spam_Classification_Model_Training")
 
-        df['processed_text'] = df['sms'].apply(preprocess_text)
+    with mlflow.start_run():  # Start an MLflow run
+        try:
+            # Log hyperparameters
+            mlflow.log_params(current_params)
 
-        X = df['processed_text']
-        y = df['label']
+            df = pd.read_csv(DATA_PATH, encoding='latin-1')
 
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=0.2, random_state=42, stratify=y)
+            df = df.rename(columns={'v1': 'label', 'v2': 'sms'})
+            df = df.drop(
+                columns=['Unnamed: 2', 'Unnamed: 3', 'Unnamed: 4'], errors='ignore')
 
-        tfidf_vectorizer = TfidfVectorizer(max_features=5000)
-        X_train_tfidf = tfidf_vectorizer.fit_transform(X_train)
-        X_test_tfidf = tfidf_vectorizer.transform(X_test)
+            df['processed_text'] = df['sms'].apply(preprocess_text)
 
-        spam_classifier = MultinomialNB()
-        spam_classifier.fit(X_train_tfidf, y_train)
+            X = df['processed_text']
+            y = df['label']
 
-        y_pred = spam_classifier.predict(X_test_tfidf)
-        accuracy = accuracy_score(y_test, y_pred)
-        report = classification_report(y_test, y_pred, output_dict=True)
+            # Split data using provided test_size and random_state
+            X_train, X_test, y_train, y_test = train_test_split(
+                X, y,
+                test_size=current_params['test_size'],
+                random_state=current_params['random_state'],
+                stratify=y
+            )
 
-        save_model_and_vectorizer(spam_classifier, tfidf_vectorizer)
+            # Initialize and fit TF-IDF Vectorizer with max_features
+            tfidf_vectorizer = TfidfVectorizer(
+                max_features=current_params['max_features'])
+            X_train_tfidf = tfidf_vectorizer.fit_transform(X_train)
+            X_test_tfidf = tfidf_vectorizer.transform(X_test)
 
-        return {
-            "status": "Model trained successfully!",
-            "accuracy": accuracy,
-            "report": report
-        }
+            # Initialize and train the Classifier (Multinomial Naive Bayes) with alpha
+            spam_classifier = MultinomialNB(alpha=current_params['alpha'])
+            spam_classifier.fit(X_train_tfidf, y_train)
 
-    except FileNotFoundError:
-        return {
-            "status": f"Error: Dataset not found at {DATA_PATH}. Please make sure 'train.csv' is in the 'data' directory.",
-            "accuracy": None,
-            "report": None
-        }
-    except Exception as e:
-        return {
-            "status": f"An error occurred during training: {e}",
-            "accuracy": None,
-            "report": None
-        }
+            # Evaluate the model
+            y_pred = spam_classifier.predict(X_test_tfidf)
+            accuracy = accuracy_score(y_test, y_pred)
+
+            # Calculate and log individual metrics for both classes
+            precision = precision_score(y_test, y_pred, pos_label=0)
+            recall = recall_score(y_test, y_pred, pos_label=0)
+            f1 = f1_score(y_test, y_pred, pos_label=0)
+
+            mlflow.log_metric("accuracy", accuracy)
+            mlflow.log_metric("spam_precision", precision)
+            mlflow.log_metric("spam_recall", recall)
+            mlflow.log_metric("spam_f1_score", f1)
+
+            # Generate and log the full classification report
+            report = classification_report(y_test, y_pred, output_dict=True)
+
+            # Log metrics for 'ham' class as well
+            if 'ham' in report:
+                mlflow.log_metric("ham_precision", report['ham']['precision'])
+                mlflow.log_metric("ham_recall", report['ham']['recall'])
+                mlflow.log_metric("ham_f1_score", report['ham']['f1_score'])
+
+            # Log the models as artifacts
+            mlflow.sklearn.log_model(spam_classifier, "spam_classifier_model")
+            mlflow.sklearn.log_model(tfidf_vectorizer, "tfidf_vectorizer")
+
+            # Save models locally as well (for direct loading by Flask app)
+            save_model_and_vectorizer(spam_classifier, tfidf_vectorizer)
+
+            return {
+                "status": "Model trained successfully!",
+                "accuracy": accuracy,
+                "report": report,
+                "mlflow_run_id": mlflow.active_run().info.run_id  # NEW: Return run ID
+            }
+
+        except FileNotFoundError:
+            mlflow.log_param("error", "FileNotFoundError")
+            return {
+                "status": f"Error: Dataset not found at {DATA_PATH}. Please make sure 'train.csv' is in the 'data' directory.",
+                "accuracy": None,
+                "report": None,
+                "mlflow_run_id": mlflow.active_run().info.run_id
+            }
+        except Exception as e:
+            mlflow.log_param("error", str(e))
+            return {
+                "status": f"An error occurred during training: {e}",
+                "accuracy": None,
+                "report": None,
+                "mlflow_run_id": mlflow.active_run().info.run_id
+            }
