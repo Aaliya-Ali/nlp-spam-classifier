@@ -102,4 +102,4 @@ def training_endpoint():
 
 if __name__ == '__main__':
     spam_classifier, tfidf_vectorizer = load_model_and_vectorizer()
-    app.run(debug=True, port=8080)
+    app.run(debug=True, port=5001)
