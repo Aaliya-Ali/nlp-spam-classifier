@@ -163,4 +163,4 @@ def best_model_parameter():
 
 if __name__ == '__main__':
     spam_classifier, tfidf_vectorizer = load_model_and_vectorizer()
-    app.run(debug=True, port=5001)
+    app.run(port=5000, debug=True)
